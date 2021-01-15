@@ -7,15 +7,17 @@ public class Database {
     private static ArrayList<ArrayList<Integer>> dependencyGraph;
     private static double[][] lexp;
     private static double[][] sreq;
-    private static ArrayList<Double> mreq = new ArrayList<>();
-    private static ArrayList<Integer> ability = new ArrayList<>();
-    private static ArrayList<Double> baseSalary = new ArrayList<>();
-    private static ArrayList<Double> consume = new ArrayList<>();
-    private static ArrayList<Double> estimate = new ArrayList<>();
-    private static ArrayList<Double> productivity = new ArrayList<>();
+    private static final ArrayList<Double> mreq = new ArrayList<>();
+    private static final ArrayList<ArrayList<Integer>> ability = new ArrayList<>();
+    private static final ArrayList<Double> baseSalary = new ArrayList<>();
+    private static final ArrayList<Double> consume = new ArrayList<>();
+    private static final ArrayList<Double> estimate = new ArrayList<>();
+    private static final ArrayList<Double> productivity = new ArrayList<>();
     private static Individual[] bestAllocation;
     private static int numHuman;
     private static int numMachine;
+    private static int humanBitLength;
+    private static int machineBitLength;
     private static int numTask;
     private static int numSkill;
 
@@ -43,7 +45,7 @@ public class Database {
         return dependencyGraph;
     }
 
-    public static int getAbility(int humanId) {
+    public static ArrayList<Integer> getAbility(int humanId) {
         return ability.get(humanId - 1);
     }
 
@@ -71,6 +73,14 @@ public class Database {
         return productivity.get(machineId - 1);
     }
 
+    public static int getHumanBitLength() {
+        return humanBitLength;
+    }
+
+    public static int getMachineBitLength() {
+        return machineBitLength;
+    }
+
     public static void setNumHuman(int numHuman) {
         Database.numHuman = numHuman;
     }
@@ -96,9 +106,13 @@ public class Database {
         bestAllocation[taskId - 1] = allocation;
     }
 
-    public static void setAbility(int[] arrAbility) {
-        for (int i = 0; i < numHuman; i++)
-            ability.add(arrAbility[i]);
+    public static void setAbility(int[][] arrAbility) {
+        for (int i = 0; i < numHuman; i++) {
+            ArrayList<Integer> arr = new ArrayList<>();
+            for (int j = 1; j <= arrAbility[i][0]; j++)
+                arr.add(arrAbility[i][j]);
+            ability.add(arr);
+        }
     }
 
     public static void setMREQ(double[] arrMREQ) {
@@ -145,6 +159,14 @@ public class Database {
             Database.productivity.add(productivity[i]);
     }
 
+    public static void setHumanBitLength(int humanBitLength) {
+        Database.humanBitLength = humanBitLength;
+    }
+
+    public static void setMachineBitLength(int machineBitLength) {
+        Database.machineBitLength = machineBitLength;
+    }
+
     public static void readData(String dataFile) {
         try {
             File data = new File(dataFile);
@@ -153,8 +175,10 @@ public class Database {
             setNumHuman(scanner.nextInt());
             setNumMachine(scanner.nextInt());
             setNumSkill(scanner.nextInt());
+            setHumanBitLength((int) Math.ceil(Math.log(numHuman) / Math.log(2)));
+            setMachineBitLength((int) Math.ceil(Math.log(numMachine) / Math.log(2)));
             int[][] adj = new int[numTask][numTask];
-            int[] arrAbility = new int[numHuman];
+            int[][] arrAbility = new int[numHuman][numMachine + 1];
             double[] arrMREQ = new double[numTask];
             double[] arrConsume = new double[numMachine];
             double[] arrBaseSalary = new double[numHuman];
@@ -166,7 +190,8 @@ public class Database {
                 for (int j = 0; j < numTask; j++)
                     adj[i][j] = scanner.nextInt();
             for (int i = 0; i < numHuman; i++)
-                arrAbility[i] = scanner.nextInt();
+                for (int j = 0; j < numMachine + 1; j++)
+                    arrAbility[i][j] = scanner.nextInt();
             for (int i = 0; i < numTask; i++)
                 arrMREQ[i] = scanner.nextDouble();
             for (int i = 0; i < numMachine; i++)

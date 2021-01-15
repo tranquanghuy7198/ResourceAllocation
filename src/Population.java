@@ -3,9 +3,9 @@ import java.util.Collections;
 import java.util.Random;
 
 public class Population {
-    private int taskId;
-    private ArrayList<Individual> individuals;
-    private ArrayList<Double> adaption;
+    private final int taskId;
+    private final ArrayList<Individual> individuals;
+    private final ArrayList<Double> adaption;
 
     public Population(int numIndividuals, int taskId) {
         individuals = new ArrayList<>();
@@ -13,9 +13,9 @@ public class Population {
         this.taskId = taskId;
         Random random = new Random();
         for (int i = 0; i < numIndividuals; i++) {
-            int humanAllocation = random.nextInt(Utils.power(2, Database.getNumHuman()) - 1) + 1;
-            int machineAllocation = random.nextInt(Utils.power(2, Database.getNumMachine()));
-            individuals.add(Individual.adjust((humanAllocation << Database.getNumMachine()) | machineAllocation, taskId));
+            int humanAllocation = random.nextInt(Database.getNumHuman()) + 1;
+            int machineAllocation = random.nextInt(Database.getNumMachine() + 1);
+            individuals.add(Individual.adjust((humanAllocation << Database.getMachineBitLength()) | machineAllocation, taskId));
         }
     }
 
@@ -35,7 +35,7 @@ public class Population {
         Individual father = individuals.get(fatherIndex);
         Individual mother = individuals.get(motherIndex);
         Random random = new Random();
-        int crossPosition = random.nextInt(Database.getNumHuman() + Database.getNumMachine()) + 1;
+        int crossPosition = random.nextInt(Database.getHumanBitLength() + Database.getMachineBitLength()) + 1;
         individuals.add(Individual.adjust(father.getHead(crossPosition) | mother.getTail(crossPosition), taskId));
         individuals.add(Individual.adjust(mother.getHead(crossPosition) | father.getTail(crossPosition), taskId));
     }
@@ -43,7 +43,7 @@ public class Population {
     public void mutate(int index) {
         Individual origin = individuals.get(index);
         Random random = new Random();
-        int position = random.nextInt(Database.getNumHuman() + Database.getNumMachine());
+        int position = random.nextInt(Database.getHumanBitLength() + Database.getMachineBitLength());
         individuals.add(Individual.adjust(origin.getBinaryExpression() ^ (1 << position), taskId));
     }
 

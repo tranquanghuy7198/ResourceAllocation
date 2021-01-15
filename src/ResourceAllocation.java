@@ -10,7 +10,7 @@ public class ResourceAllocation {
         /* Main information */
         Database.readData("src/data/data1.txt");
         for (int i = 1; i <= Database.getNumTask(); i++)
-            Database.setBestAllocation(new Individual(Utils.power(2, Database.getNumHuman() + Database.getNumMachine()) - 1), i);
+            Database.setBestAllocation(new Individual((1 << Database.getMachineBitLength()) | 1), i);
 
         /* Populations initialization */
         for (int i = 1; i <= Database.getNumTask(); i++)
@@ -39,17 +39,13 @@ public class ResourceAllocation {
         /* Print the final result */
         for (int i = 1; i <= Database.getNumTask(); i++) {
             int bestAllocation = Database.getBestAllocation(i).getBinaryExpression();
-            int humanAllocation = bestAllocation >> Database.getNumMachine();
-            int machineAllocation = bestAllocation ^ (humanAllocation << Database.getNumMachine());
-            System.out.print("Task #" + i + ": Human{");
-            for (int k = 1; k <= Database.getNumHuman(); k++)
-                if ((humanAllocation & (1 << (Database.getNumHuman() - k))) != 0)
-                    System.out.print(k);
-            System.out.print("} Machine{");
-            for (int k = 1; k <= Database.getNumMachine(); k++)
-                if ((machineAllocation & (1 << (Database.getNumMachine() - k))) != 0)
-                    System.out.print(k);
-            System.out.println("}");
+            int humanAllocation = bestAllocation >> Database.getMachineBitLength();
+            int machineAllocation = bestAllocation ^ (humanAllocation << Database.getMachineBitLength());
+            System.out.print("Task #" + i + ": human #" + humanAllocation);
+            if (machineAllocation > 0)
+                System.out.println(", machine #" + machineAllocation);
+            else
+                System.out.println(", no machine!");
         }
     }
 }
