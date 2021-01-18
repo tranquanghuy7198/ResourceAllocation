@@ -23,7 +23,15 @@ public class Individual {
         return (binaryExpression >> rightLength) << rightLength;
     }
 
-    /** Remove some machines that people in this task cannot use */
+    public int getHuman() {
+        return binaryExpression >> Database.getMachineBitLength();
+    }
+
+    public int getMachine() {
+        return binaryExpression ^ ((binaryExpression >> Database.getMachineBitLength()) << Database.getMachineBitLength());
+    }
+
+    /** Remove some machines that a person in this task cannot use */
     public static Individual adjust(int binaryExpression, int taskId) {
         Random random = new Random();
         int humanId = binaryExpression >> Database.getMachineBitLength();
@@ -37,5 +45,13 @@ public class Individual {
         } else
             machineId = 0;
         return new Individual((humanId << Database.getMachineBitLength()) | machineId);
+    }
+
+    /** Random a new individual */
+    public static Individual random(int taskId) {
+        Random random = new Random();
+        int humanAllocation = random.nextInt(Database.getNumHuman()) + 1;
+        int machineAllocation = random.nextInt(Database.getNumMachine() + 1);
+        return adjust((humanAllocation << Database.getMachineBitLength()) | machineAllocation, taskId);
     }
 }

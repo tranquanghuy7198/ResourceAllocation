@@ -32,7 +32,7 @@ public class Utils {
                 + wCost * fCost(humanWorkingTime, machineWorkingTime);
     }
 
-    public static double fDuration(int[] humanAllocation, int[] machineAllocation, double[] start, double[] duration, double[] finish) {
+    private static double fDuration(int[] humanAllocation, int[] machineAllocation, double[] start, double[] duration, double[] finish) {
         ArrayList<ArrayList<Integer>> adj = Database.getDependencyGraph();
         double[][] lexp = Database.getLEXP();
         double[][] sreq = Database.getSREQ();
@@ -125,5 +125,21 @@ public class Utils {
         for (int i = 0; i < Database.getNumMachine(); i++)
             machineCost += Database.getConsume(i + 1) * machineWorkingTime[i];
         return humanCost / Database.getNumHuman() + machineCost / Database.getNumMachine();
+    }
+
+    public static double compare(Individual[] allocation1, Individual[] allocation2) {
+        double totalDifference = 0;
+        double[][] lexp = Database.getLEXP();
+        for (int taskId = 1; taskId <= Database.getNumTask(); taskId++) {
+            int human1 = allocation1[taskId - 1].getHuman();
+            int machine1 = allocation1[taskId - 1].getMachine();
+            int human2 = allocation2[taskId - 1].getHuman();
+            int machine2 = allocation2[taskId - 1].getMachine();
+            for (int i = 0; i < Database.getNumSkill(); i++)
+                totalDifference += Math.abs(lexp[human1 - 1][i] - lexp[human2 - 1][i]);
+            if (machine1 != 0 && machine2 != 0)
+                totalDifference += Math.abs(Database.getProductivity(machine1) - Database.getProductivity(machine2));
+        }
+        return totalDifference / Database.getNumTask();
     }
 }

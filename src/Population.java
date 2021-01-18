@@ -11,12 +11,8 @@ public class Population {
         individuals = new ArrayList<>();
         adaption = new ArrayList<>();
         this.taskId = taskId;
-        Random random = new Random();
-        for (int i = 0; i < numIndividuals; i++) {
-            int humanAllocation = random.nextInt(Database.getNumHuman()) + 1;
-            int machineAllocation = random.nextInt(Database.getNumMachine() + 1);
-            individuals.add(Individual.adjust((humanAllocation << Database.getMachineBitLength()) | machineAllocation, taskId));
-        }
+        for (int i = 0; i < numIndividuals; i++)
+            individuals.add(Individual.random(taskId));
     }
 
     public Individual getBestAllocation() {

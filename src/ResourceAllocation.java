@@ -2,9 +2,14 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class ResourceAllocation {
+    private static final int INDIVIDUALS_PER_POPULATION = 20;
+    private static final int MAX_LOOPS = 1000;
+    private static final int STABLE_LOOPS = 10;
+    private static final double STABLE_THRESHOLD = 0.001;
+    private static int stableCount = 0;
+
     public static void main(String[] args) {
         ArrayList<Population> populations = new ArrayList<>();
-        final int INDIVIDUALS_PER_POPULATION = 20;
         Random random = new Random();
 
         /* Main information */
@@ -17,7 +22,7 @@ public class ResourceAllocation {
             populations.add(new Population(INDIVIDUALS_PER_POPULATION, i));
 
         /* Evolution */
-        for (int iteration = 0; iteration < 100; iteration++) {
+        for (int iteration = 0; ; iteration++) {
             for (Population population : populations) {
                 population.computeFitness();
                 population.sort();
@@ -34,6 +39,8 @@ public class ResourceAllocation {
                     population.mutate(mutationId);
                 }
             }
+            if (stop(iteration))
+                break;
         }
 
         /* Print the final result */
@@ -47,5 +54,21 @@ public class ResourceAllocation {
             else
                 System.out.println(", no machine!");
         }
+    }
+
+    private static boolean stop(int iteration) {
+        if (Database.compareWithLast() < STABLE_THRESHOLD)
+            stableCount++;
+        else
+            stableCount = 0;
+        if (iteration >= MAX_LOOPS) {
+            System.out.println("Stop because of max loop");
+            return true;
+        }
+        if (stableCount >= STABLE_LOOPS) {
+            System.out.println("Stop when reach stable state");
+            return true;
+        }
+        return false;
     }
 }

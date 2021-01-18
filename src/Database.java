@@ -14,6 +14,7 @@ public class Database {
     private static final ArrayList<Double> estimate = new ArrayList<>();
     private static final ArrayList<Double> productivity = new ArrayList<>();
     private static Individual[] bestAllocation;
+    private static Individual[] lastBestAllocation;
     private static int numHuman;
     private static int numMachine;
     private static int humanBitLength;
@@ -66,6 +67,8 @@ public class Database {
     }
 
     public static double getConsume(int machineId) {
+        if (machineId == 0)
+            return 0;
         return consume.get(machineId - 1);
     }
 
@@ -81,17 +84,28 @@ public class Database {
         return machineBitLength;
     }
 
+    public static double compareWithLast() {
+        return Utils.compare(lastBestAllocation, bestAllocation);
+    }
+
     public static void setNumHuman(int numHuman) {
         Database.numHuman = numHuman;
+        humanBitLength = (int) Math.ceil(Math.log(numHuman) / Math.log(2));
     }
 
     public static void setNumMachine(int numMachine) {
         Database.numMachine = numMachine;
+        machineBitLength = (int) Math.ceil(Math.log(numMachine) / Math.log(2));
     }
 
     public static void setNumTask(int numTask) {
         Database.numTask = numTask;
         bestAllocation = new Individual[numTask];
+        lastBestAllocation = new Individual[numTask];
+        for (int taskId = 1; taskId <= numTask; taskId++) {
+            bestAllocation[taskId - 1] = new Individual((1 << machineBitLength) | 1);
+            lastBestAllocation[taskId - 1] = new Individual((1 << machineBitLength) | 1);
+        }
     }
 
     public static double getEstimatedTime(int taskId) {
@@ -103,6 +117,7 @@ public class Database {
     }
 
     public static void setBestAllocation(Individual allocation, int taskId) {
+        lastBestAllocation[taskId - 1] = bestAllocation[taskId - 1];
         bestAllocation[taskId - 1] = allocation;
     }
 
@@ -159,24 +174,14 @@ public class Database {
             Database.productivity.add(productivity[i]);
     }
 
-    public static void setHumanBitLength(int humanBitLength) {
-        Database.humanBitLength = humanBitLength;
-    }
-
-    public static void setMachineBitLength(int machineBitLength) {
-        Database.machineBitLength = machineBitLength;
-    }
-
     public static void readData(String dataFile) {
         try {
             File data = new File(dataFile);
             Scanner scanner = new Scanner(data);
-            setNumTask(scanner.nextInt());
             setNumHuman(scanner.nextInt());
             setNumMachine(scanner.nextInt());
             setNumSkill(scanner.nextInt());
-            setHumanBitLength((int) Math.ceil(Math.log(numHuman) / Math.log(2)));
-            setMachineBitLength((int) Math.ceil(Math.log(numMachine) / Math.log(2)));
+            setNumTask(scanner.nextInt());
             int[][] adj = new int[numTask][numTask];
             int[][] arrAbility = new int[numHuman][numMachine + 1];
             double[] arrMREQ = new double[numTask];
