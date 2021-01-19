@@ -46,7 +46,7 @@ public class Population {
     public void computeFitness() {
         adaption.clear();
         for (Individual individual : individuals)
-            adaption.add(Utils.fitness(individual.getBinaryExpression(), taskId));
+            adaption.add(Utils.fitness(individual.getBinaryExpression(), taskId, false));
     }
 
     public void sort() {
@@ -59,7 +59,7 @@ public class Population {
     }
 
     public void filter() {
-        int numDeath = (int) (Utils.filterRate * individuals.size());
+        int numDeath = (int) (Utils.FILTER_RATE * individuals.size());
         for (int i = 0; i < numDeath; i++) {
             individuals.remove(individuals.size() - 1);
             adaption.remove(adaption.size() - 1);

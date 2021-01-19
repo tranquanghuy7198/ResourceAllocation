@@ -1,12 +1,30 @@
 import java.util.ArrayList;
 
 public class Utils {
-    public static final double wDuration = 0.014;
-    public static final double wAssignment = 0.985;
-    public static final double wCost = 0.001;
-    public static final double filterRate = 0.5;        // 50% of individuals will be removed after each iteration
+    private static final double wDuration = 0.014;
+    private static final double wAssignment = 0.985;
+    private static final double wCost = 0.001;
+    public static final double FILTER_RATE = 0.5;        // 50% of individuals will be removed after each iteration
 
-    public static double fitness(int binaryExpression, int taskId) {
+    private static String formatTime(int seconds) {
+        int[] time = new int[5];
+        int[] timeLength = new int[]{60, 60, 24, 7};
+        String[] timeUnits = new String[]{" seconds ", " minutes ", " hours ", " days ", " weeks "};
+        time[0] = seconds;
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < 4; i++) {
+            if (time[i] > timeLength[i]) {
+                time[i + 1] = time[i] / timeLength[i];
+                time[i] %= timeLength[i];
+            }
+        }
+        for (int i = 4; i >= 1; i--)
+            if (time[i] > 0)
+                result.append(time[i]).append(timeUnits[i]);
+        return result.toString();
+    }
+
+    public static double fitness(int binaryExpression, int taskId, boolean readFromDB) {
         double[] start = new double[Database.getNumTask()];     // t_i^start
         double[] duration = new double[Database.getNumTask()];      // t_i^duration
         double[] finish = new double[Database.getNumTask()];    // t_i^finish
@@ -18,7 +36,7 @@ public class Utils {
         int[] machineAllocation = new int[Database.getNumTask()];   // machineAllocation[i] is the machine allocation of task number #(i+1)
         for (int i = 1; i <= Database.getNumTask(); i++) {
             int allocation;
-            if (i != taskId)
+            if (i != taskId || readFromDB)
                 allocation = Database.getBestAllocation(i).getBinaryExpression();
             else
                 allocation = binaryExpression;
@@ -27,9 +45,12 @@ public class Utils {
         }
 
         /* Final fitness result */
-        return wDuration * fDuration(humanAllocation, machineAllocation, start, duration, finish)
+        double fitnessValue = wDuration * fDuration(humanAllocation, machineAllocation, start, duration, finish)
                 + wAssignment * fAssignment(humanAllocation, machineAllocation, start, duration, finish, humanWorkingTime, machineWorkingTime)
                 + wCost * fCost(humanWorkingTime, machineWorkingTime);
+        if (readFromDB)
+            printFinalResult(start, finish, fitnessValue);
+        return fitnessValue;
     }
 
     private static double fDuration(int[] humanAllocation, int[] machineAllocation, double[] start, double[] duration, double[] finish) {
@@ -141,5 +162,23 @@ public class Utils {
                 totalDifference += Math.abs(Database.getProductivity(machine1) - Database.getProductivity(machine2));
         }
         return totalDifference / Database.getNumTask();
+    }
+
+    private static void printFinalResult(double[] start, double[] finish, double fitnessValue) {
+        double projectFinish = 0;
+        for (int i = 1; i <= Database.getNumTask(); i++) {
+            Individual allocation = Database.getBestAllocation(i);
+            System.out.println("Task #" + i + ":");
+            System.out.println("\t- Human #" + allocation.getHuman() + " is allocated.");
+            if (allocation.getMachine() != 0)
+                System.out.println("\t- Machine #" + allocation.getMachine() + " is allocated.");
+            else
+                System.out.println("\t- This task does not use machine.");
+            System.out.println("\t- Starts at " + String.format("%.2f", start[i - 1]) + " (h).");
+            System.out.println("\t- Finishes at " + String.format("%.2f", finish[i - 1]) + " (h).");
+            projectFinish = Math.max(projectFinish, finish[i - 1]);
+        }
+        System.out.println("The whole project lasts for " + formatTime((int) (projectFinish * 3600)));
+        System.out.println("Final fitness value: " + fitnessValue);
     }
 }
