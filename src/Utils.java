@@ -5,6 +5,10 @@ public class Utils {
     private static final double wAssignment = 0.985;
     private static final double wCost = 0.001;
     public static final double FILTER_RATE = 0.5;        // 50% of individuals will be removed after each iteration
+    public static final int INDIVIDUALS_PER_POPULATION = 200;
+    public static final int MAX_LOOPS = 2000000;
+    public static final int STABLE_LOOPS = 10;
+    public static final double STABLE_THRESHOLD = 0.001;
 
     private static String formatTime(int seconds) {
         int[] time = new int[5];
