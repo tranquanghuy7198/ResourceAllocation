@@ -1,14 +1,14 @@
 import java.util.ArrayList;
 
 public class Utils {
-    private static final double wDuration = 0.014;
-    private static final double wAssignment = 0.985;
-    private static final double wCost = 0.001;
+    private static final double wDuration = 0.00005249;
+    private static final double wAssignment = 0.76447751;
+    private static final double wCost = 0.23547;
     public static final double FILTER_RATE = 0.5;        // 50% of individuals will be removed after each iteration
     public static final int INDIVIDUALS_PER_POPULATION = 200;
     public static final int MAX_LOOPS = 2000000;
     public static final int STABLE_LOOPS = 10;
-    public static final double STABLE_THRESHOLD = 0.001;
+    public static final double STABLE_THRESHOLD = 0.0001;
 
     private static String formatTime(int seconds) {
         int[] time = new int[5];
@@ -179,6 +179,7 @@ public class Utils {
             else
                 System.out.println("\t- This task does not use machine.");
             System.out.println("\t- Starts at " + String.format("%.2f", start[i - 1]) + " (h).");
+            System.out.println("\t- Lasts for " + String.format("%.2f", finish[i - 1] - start[i - 1]) + " (h).");
             System.out.println("\t- Finishes at " + String.format("%.2f", finish[i - 1]) + " (h).");
             projectFinish = Math.max(projectFinish, finish[i - 1]);
         }

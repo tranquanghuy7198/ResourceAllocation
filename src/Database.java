@@ -90,12 +90,12 @@ public class Database {
 
     public static void setNumHuman(int numHuman) {
         Database.numHuman = numHuman;
-        humanBitLength = (int) Math.ceil(Math.log(numHuman) / Math.log(2));
+        humanBitLength = (int) Math.floor(Math.log(numHuman) / Math.log(2)) + 1;
     }
 
     public static void setNumMachine(int numMachine) {
         Database.numMachine = numMachine;
-        machineBitLength = (int) Math.ceil(Math.log(numMachine) / Math.log(2));
+        machineBitLength = (int) Math.floor(Math.log(numMachine) / Math.log(2)) + 1;
     }
 
     public static void setNumTask(int numTask) {

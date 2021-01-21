@@ -51,7 +51,7 @@ public class Individual {
     public static Individual random(int taskId) {
         Random random = new Random();
         int humanAllocation = random.nextInt(Database.getNumHuman()) + 1;
-        int machineAllocation = random.nextInt(Database.getNumMachine() + 1);
+        int machineAllocation = random.nextInt(Database.getNumMachine()) + 1;
         return adjust((humanAllocation << Database.getMachineBitLength()) | machineAllocation, taskId);
     }
 }

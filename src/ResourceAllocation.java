@@ -9,7 +9,7 @@ public class ResourceAllocation {
         Random random = new Random();
 
         /* Main information */
-        Database.readData("src/data/data1.txt");
+        Database.readData("src/data/data2.txt");
 
         /* Populations initialization */
         for (int i = 1; i <= Database.getNumTask(); i++)
